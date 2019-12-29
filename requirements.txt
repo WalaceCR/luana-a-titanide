@@ -1,0 +1,6 @@
+-i https://pypi.org/simple
+selenium
+beautifulsoup4
+pandas
+webdriver_manager
+lxml
