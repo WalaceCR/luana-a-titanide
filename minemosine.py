@@ -22,6 +22,7 @@ coluna_3=[]
 coluna_4=[]
 coluna_5=[]
 coluna_6=[]
+coluna_7=[]
 
 driver.get(settings['url'])
 
@@ -49,17 +50,19 @@ tables = soup.find("table", {"class": settings['classe-tabela']}).find("tbody")
 
 for tr in tables.findAll("tr"):
     td = tr.findAll("td")
-    if len(td) == 6:
+    if len(td) == 7:
         coluna_1.append(td[0].text)
         coluna_2.append(td[1].text)
         coluna_3.append(td[2].text)
         coluna_4.append(td[3].text)
         coluna_5.append(td[4].text)
         coluna_6.append(td[5].text)
+        coluna_7.append(td[6].text)
+
     print("Capturando dados da página...")
     
 print("Copiando dados para o Excel...")
-df = pd.DataFrame({settings['cabecalho-1']:coluna_1,settings['cabecalho-2']:coluna_2,settings['cabecalho-3']:coluna_3,settings['cabecalho-4']:coluna_4,settings['cabecalho-5']:coluna_5,settings['cabecalho-6']:coluna_6}) 
+df = pd.DataFrame({settings['cabecalho-1']:coluna_1,settings['cabecalho-2']:coluna_2,settings['cabecalho-3']:coluna_3,settings['cabecalho-4']:coluna_4,settings['cabecalho-5']:coluna_5,settings['cabecalho-6']:coluna_6,settings['cabecalho-7']:coluna_7}) 
 df.to_csv(settings['titulo-arquivo-gerado'], index=False, encoding=settings['encoding'])
 print("Excel gerado com sucesso!!!")
 
