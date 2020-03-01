@@ -16,61 +16,71 @@ os.environ["webdriver.chrome.driver"]=driverlocation
 driver = webdriver.Chrome()
 
 # Colocar isso em uma classe PageObject ou algo do tipo
-coluna_1=[]
-coluna_2=[]
-coluna_3=[]
-coluna_4=[]
-coluna_5=[]
-coluna_6=[]
-coluna_7=[]
 
-driver.get(settings['url'])
+for sprints in settings['sprints']:
 
-driver.maximize_window()
+    coluna_1=[]
+    coluna_2=[]
+    coluna_3=[]
+    coluna_4=[]
+    coluna_5=[]
+    coluna_6=[]
+    coluna_7=[]
 
-txt_usuario = driver.find_element(By.ID, settings['elemento-usuario-id'])
-txt_senha = driver.find_element(By.ID, settings['elemento-senha-id'])
-btn_button = driver.find_element(By.ID, settings['elemento-botao-id'])
+    driver.get(sprints['url'])
 
-txt_usuario.send_keys(settings['usuario'])
-txt_senha.send_keys(settings['senha'])
-btn_button.click()
+    driver.maximize_window()
 
-delay = 25 # seconds
-try:
-    myElem = WebDriverWait(driver, delay).until(EC.presence_of_element_located((By.XPATH, settings['elemento-ancora'])))
-    print("Página está pronta!!! :)")
-except TimeoutException:
-    print("Esperei demais :(")
+    txt_usuario = driver.find_element(By.ID, settings['elemento-usuario-id'])
+    txt_senha = driver.find_element(By.ID, settings['elemento-senha-id'])
+    btn_button = driver.find_element(By.ID, settings['elemento-botao-id'])
 
-content = driver.page_source
-soup = BeautifulSoup(content, "lxml")
+    txt_usuario.send_keys(settings['usuario'])
+    txt_senha.send_keys(settings['senha'])
+    btn_button.click()
 
-tables = soup.find("table", {"class": settings['classe-tabela']}).find("tbody")
+    delay = 25 # seconds
+    try:
+        myElem = WebDriverWait(driver, delay).until(EC.presence_of_element_located((By.XPATH, settings['elemento-ancora'])))
+        print("Página está pronta!!! :)")
+    except TimeoutException:
+        print("Esperei demais :(")
 
-for tr in tables.findAll("tr"):
-    td = tr.findAll("td")
-    if len(td) == 7:
-        coluna_1.append(td[0].text.replace(',', ' '))
-        coluna_2.append(td[1].text)
-        coluna_3.append(td[2].text)
-        coluna_4.append(td[3].text)
-        coluna_5.append(td[4].text)
-        coluna_6.append(td[5].text)
-        coluna_7.append(td[6].text)
+    sprintAtual = driver.find_element(By.ID, settings['elemento-dropdwon-sprint']).text.replace('/','_')
+    content = driver.page_source
+    soup = BeautifulSoup(content, "lxml")
 
-    print("Capturando dados da página...")
-    
-print("Copiando dados para o Excel...")
-df = pd.DataFrame({settings['cabecalho-1']:coluna_1
-                    ,settings['cabecalho-2']:coluna_2
-                    ,settings['cabecalho-3']:coluna_3
-                    ,settings['cabecalho-4']:coluna_4
-                    ,settings['cabecalho-5']:coluna_5
-                    ,settings['cabecalho-6']:coluna_6
-                    ,settings['cabecalho-7']:coluna_7}) 
-df.to_csv(settings['titulo-arquivo-gerado'], index=False, encoding=settings['encoding'])
-print("Excel gerado com sucesso!!!")
+    divMestra = soup.find("div", {"class": settings['div-mestra-classe']})
 
-driver.delete_all_cookies()
+    for todasAsTabelas in divMestra.findAll("table", {"class": settings['classe-tabela']}):
+        for tables in todasAsTabelas.findAll("tbody"):
+            for tr in tables.findAll("tr"):
+                td = tr.findAll("td")
+                if len(td) == int(settings['quantidade-colunas-desejada']):
+                    coluna_1.append(td[0].text.replace(',', ' '))
+                    coluna_2.append(td[1].text)
+                    coluna_3.append(td[2].text)
+                    coluna_4.append(td[3].text)
+                    coluna_5.append(td[4].text)
+                    coluna_6.append(td[5].text)
+                    ##coluna_7.append(td[6].text)
+
+                print("Capturando dados da página...")
+        
+    print("Copiando dados para o Excel...")
+    df = pd.DataFrame({settings['cabecalho-1']:coluna_1
+                        ,settings['cabecalho-2']:coluna_2
+                        ,settings['cabecalho-3']:coluna_3
+                        ,settings['cabecalho-4']:coluna_4
+                        ,settings['cabecalho-5']:coluna_5
+                        ,settings['cabecalho-6']:coluna_6
+                        ##,settings['cabecalho-7']:coluna_7
+                        })
+                         
+    df.to_csv(sprintAtual + "_" + settings['titulo-arquivo-gerado'], index=False, encoding=settings['encoding'])
+    print("Excel gerado com sucesso!!!")
+    driver.delete_all_cookies()
+
+    df = None
+
 driver.quit()
